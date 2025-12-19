@@ -128,40 +128,6 @@
     .msg.bad{color: var(--bad)}
     .msg.ok{color: var(--ok)}
 
-    .list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      margin-top: 10px;
-    }
-    .item{
-      padding: 12px;
-      border-radius: 14px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.03);
-    }
-    .itemTop{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
-    }
-    .itemTitle{
-      font-size: 14px;
-      margin:0;
-      font-weight: 700;
-    }
-    .itemMeta{
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-    .itemBtns{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
     .ingredients{
       margin-top:10px;
       border-top:1px dashed rgba(255,255,255,.12);
@@ -261,7 +227,22 @@
           <label>Receta</label>
           <select id="useRecipeSelect"></select>
 
+          <!-- ✅ NUEVO: Cantidad de líquido por hectárea -->
+          <label>Cantidad de líquido (caldo) por hectárea</label>
           <div class="row">
+            <div>
+              <input id="useLiquidPerHa" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Ej: 100" />
+            </div>
+            <div>
+              <select id="useLiquidUnit">
+                <option value="L">L</option>
+                <option value="mL">mL</option>
+              </select>
+            </div>
+          </div>
+          <div class="hint">El agua se calcula como: (caldo total) − (ingredientes líquidos). Se consideran líquidos: L, mL y cc (cc = mL).</div>
+
+          <div class="row" style="margin-top:10px;">
             <div>
               <label>Hectáreas</label>
               <input id="useHectares" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Ej: 5" />
@@ -282,7 +263,6 @@
           <label>Nombre de la receta</label>
           <input id="newRecipeName" placeholder="Ej: Soja - Malezas" />
 
-          <!-- ✅ NUEVO: Descripción (justo abajo del nombre) -->
           <label>Descripción (opcional)</label>
           <textarea id="newRecipeDesc" rows="2" placeholder="Ej: Orden de mezcla, advertencias, momento del día, etc."></textarea>
 
@@ -350,7 +330,6 @@
             <label>Nombre</label>
             <input id="adminName" />
 
-            <!-- ✅ NUEVO: Descripción en el editor -->
             <label>Descripción (opcional)</label>
             <textarea id="adminDesc" rows="2" placeholder="Notas/indicaciones para esta receta..."></textarea>
 
@@ -507,7 +486,6 @@ function renderRecipeSelects(recipes) {
    Calculate
 ========================= */
 function formatNumber(n) {
-  // mantén 3 decimales si hace falta, si no, corta lindo
   const x = Number(n);
   if (!isFinite(x)) return "";
   const abs = Math.abs(x);
@@ -523,10 +501,38 @@ function calculateForHectares(recipe, ha) {
   }));
 }
 
-function renderCalcOutput(lines) {
+/* ✅ NUEVO: conversiones para líquidos */
+function isLiquidUnit(unit){
+  return unit === "L" || unit === "mL" || unit === "cc";
+}
+function toMl(qty, unit){
+  const q = Number(qty);
+  if (!isFinite(q)) return 0;
+  if (unit === "L") return q * 1000;
+  if (unit === "mL") return q;
+  if (unit === "cc") return q; // 1 cc = 1 mL
+  return 0;
+}
+function mlToPretty(ml){
+  const x = Number(ml);
+  if (!isFinite(x)) return { qty: 0, unit: "L" };
+  // mostramos en L si es >= 1000mL, sino mL
+  if (Math.abs(x) >= 1000) return { qty: x/1000, unit: "L" };
+  return { qty: x, unit: "mL" };
+}
+
+function renderCalcOutput(lines, waterLine) {
   const out = $("calcOutput");
   out.style.display = "grid";
   out.innerHTML = "";
+
+  if (waterLine) {
+    const row = document.createElement("div");
+    row.className = "ingRow";
+    row.innerHTML = `<span><strong>${waterLine.name}</strong></span><span><strong>${formatNumber(waterLine.qty)} ${waterLine.unit}</strong></span>`;
+    out.appendChild(row);
+  }
+
   lines.forEach(l => {
     const row = document.createElement("div");
     row.className = "ingRow";
@@ -536,10 +542,7 @@ function renderCalcOutput(lines) {
 }
 
 /* =========================
-   CSV Export/Import
-   Nuevo formato compatible:
-   recipe_id,recipe_name,recipe_desc,ingredient_name,qty,unit
-   (si el CSV viejo NO tiene recipe_desc, igual se importa)
+   CSV Export/Import (con desc)
 ========================= */
 function recipesToCSV(recipes) {
   const header = ["recipe_id","recipe_name","recipe_desc","ingredient_name","qty","unit"];
@@ -559,7 +562,6 @@ function recipesToCSV(recipes) {
       rows.push(line);
     });
     if (r.ingredients.length === 0) {
-      // allow empty recipe
       rows.push([r.id, escapeCSV(r.name), escapeCSV(desc), "", "", ""].join(","));
     }
   });
@@ -574,7 +576,6 @@ function escapeCSV(s) {
 }
 
 function parseCSV(text) {
-  // Simple CSV parser for our schema (handles quoted strings)
   const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
   if (lines.length < 1) return [];
 
@@ -583,13 +584,12 @@ function parseCSV(text) {
   const idx = {
     recipe_id: header.indexOf("recipe_id"),
     recipe_name: header.indexOf("recipe_name"),
-    recipe_desc: header.indexOf("recipe_desc"), // puede ser -1
+    recipe_desc: header.indexOf("recipe_desc"), // puede faltar
     ingredient_name: header.indexOf("ingredient_name"),
     qty: header.indexOf("qty"),
     unit: header.indexOf("unit")
   };
 
-  // requeridos mínimos
   if (idx.recipe_id === -1 || idx.recipe_name === -1 || idx.ingredient_name === -1 || idx.qty === -1 || idx.unit === -1) {
     throw new Error("CSV inválido: faltan columnas.");
   }
@@ -692,7 +692,6 @@ function renderAdminEditor(recipe) {
       });
     });
 
-    // live update fields
     box.querySelectorAll("input[data-f], select[data-f]").forEach(el => {
       el.addEventListener("input", () => {
         const i = Number(el.getAttribute("data-i"));
@@ -747,7 +746,6 @@ function renderAdminEditor(recipe) {
     msg.textContent = "Receta borrada.";
     msg.className = "msg ok";
     refreshUI();
-    // reselect
     $("adminRecipeSelect").value = filtered[0]?.id || "";
     handleAdminSelect();
   };
@@ -763,7 +761,6 @@ function escapeHtml(s){
 function refreshUI() {
   const recipes = loadRecipes();
   renderRecipeSelects(recipes);
-  // keep selections stable if possible
   if (recipes.length > 0) {
     if (!$("useRecipeSelect").value) $("useRecipeSelect").value = recipes[0].id;
     if (!$("adminRecipeSelect").value) $("adminRecipeSelect").value = recipes[0].id;
@@ -797,14 +794,14 @@ $("btnAddIngredient").onclick = () => {
 $("btnClearDraft").onclick = () => {
   draftIngredients = [];
   $("newRecipeName").value = "";
-  $("newRecipeDesc").value = ""; /* ✅ NUEVO */
+  $("newRecipeDesc").value = "";
   $("saveMsg").textContent = "";
   renderDraftIngredients();
 };
 
 $("btnSaveRecipe").onclick = () => {
   const name = $("newRecipeName").value.trim();
-  const desc = $("newRecipeDesc").value.trim(); /* ✅ NUEVO */
+  const desc = $("newRecipeDesc").value.trim();
 
   if (!name) { $("saveMsg").textContent="Poné un nombre de receta."; $("saveMsg").className="msg bad"; return; }
   if (draftIngredients.length === 0) { $("saveMsg").textContent="Agregá al menos 1 ingrediente."; $("saveMsg").className="msg bad"; return; }
@@ -813,7 +810,7 @@ $("btnSaveRecipe").onclick = () => {
   const newR = {
     id: uid(),
     name,
-    desc, /* ✅ NUEVO */
+    desc,
     ingredients: draftIngredients.map(x => ({ name: x.name, qty: Number(x.qty), unit: x.unit }))
   };
   recipes.push(newR);
@@ -824,7 +821,7 @@ $("btnSaveRecipe").onclick = () => {
   draftIngredients = [];
   renderDraftIngredients();
   $("newRecipeName").value = "";
-  $("newRecipeDesc").value = ""; /* ✅ NUEVO */
+  $("newRecipeDesc").value = "";
 
   refreshUI();
 };
@@ -835,15 +832,53 @@ $("btnCalculate").onclick = () => {
   const recipe = recipes.find(r => r.id === rid);
   const ha = Number($("useHectares").value);
 
+  const liquidPerHa = Number($("useLiquidPerHa").value);
+  const liquidUnit = $("useLiquidUnit").value;
+
   $("calcMsg").textContent = "";
+  $("calcMsg").className = "msg";
   $("calcOutput").style.display = "none";
   $("calcOutput").innerHTML = "";
 
   if (!recipe) { $("calcMsg").textContent="No hay receta seleccionada."; return; }
   if (!isFinite(ha) || ha <= 0) { $("calcMsg").textContent="Ingresá hectáreas válidas (>0)."; return; }
+  if (!isFinite(liquidPerHa) || liquidPerHa <= 0) { $("calcMsg").textContent="Ingresá un caldo por hectárea válido (>0)."; return; }
 
   const lines = calculateForHectares(recipe, ha);
-  renderCalcOutput(lines);
+
+  // ✅ NUEVO: calcular agua
+  const totalMl = toMl(liquidPerHa, liquidUnit) * ha;
+
+  let liquidsMl = 0;
+  let ignored = 0;
+
+  (recipe.ingredients || []).forEach(ing => {
+    if (isLiquidUnit(ing.unit)) liquidsMl += toMl(ing.qty, ing.unit) * ha;
+    else ignored++;
+  });
+
+  const waterMl = totalMl - liquidsMl;
+  const w = mlToPretty(waterMl);
+
+  const waterLine = {
+    name: "Agua",
+    qty: w.qty,
+    unit: w.unit
+  };
+
+  renderCalcOutput(lines, waterLine);
+
+  // mensajes
+  const msgs = [];
+  if (ignored > 0) msgs.push(`Nota: ${ignored} ingrediente(s) en kg/g/unid no se restan del agua.`);
+  if (waterMl < 0) {
+    msgs.push("⚠️ El total de ingredientes líquidos supera el caldo total. Ajustá el 'caldo por hectárea' o las dosis.");
+    $("calcMsg").className = "msg bad";
+  } else {
+    $("calcMsg").className = "msg";
+  }
+  $("calcMsg").textContent = msgs.join(" ");
+
 };
 
 $("btnExportCSV").onclick = () => {
@@ -880,7 +915,6 @@ $("importCSVFile").addEventListener("change", async (e) => {
       return;
     }
 
-    // Merge by recipe id; if collision, keep imported name/ings/desc
     const current = loadRecipes();
     const map = new Map(current.map(r => [r.id, r]));
     imported.forEach(r => map.set(r.id, r));
@@ -903,11 +937,10 @@ function handleAdminSelect() {
   const r = recipes.find(x => x.id === rid);
   if (!r) { renderAdminEditor(null); return; }
 
-  // Make a deep copy for editing
   const copy = {
     id: r.id,
     name: r.name,
-    desc: r.desc || "", /* ✅ NUEVO */
+    desc: r.desc || "",
     ingredients: (r.ingredients || []).map(i => ({ name: i.name, qty: i.qty, unit: i.unit }))
   };
   renderAdminEditor(copy);
@@ -966,12 +999,10 @@ async function activate(code){
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Sanity: IDs
   const required = ["licenseWall","appRoot","licenseCodeInput","licenseActivateBtn","licenseMsg"];
   for (const id of required){
     if (!$(id)) {
       console.error("Falta elemento:", id);
-      // Si falta, mostramos app para no dejar al usuario en blanco
       $("appRoot").style.display = "block";
       return;
     }
