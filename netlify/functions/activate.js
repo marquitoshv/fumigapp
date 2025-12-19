@@ -53,7 +53,12 @@ exports.handler = async (event) => {
     await redisSet(baseUrl, token, `device:${deviceId}`, code);
 
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
-  } catch {
-    return { statusCode: 500, body: JSON.stringify({ ok: false, reason: "Error interno" }) };
-  }
-};
+  } catch (err) {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      ok: false,
+      reason: "ERROR: " + (err && err.message ? err.message : String(err))
+    })
+  };
+}
