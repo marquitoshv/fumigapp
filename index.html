@@ -261,9 +261,6 @@
           <label>Receta</label>
           <select id="useRecipeSelect"></select>
 
-          <!-- NUEVO (solo muestra la descripción) -->
-          <div id="useRecipeDesc" class="hint" style="margin-top:8px; display:none;"></div>
-
           <div class="row">
             <div>
               <label>Hectáreas</label>
@@ -285,9 +282,9 @@
           <label>Nombre de la receta</label>
           <input id="newRecipeName" placeholder="Ej: Soja - Malezas" />
 
-          <!-- NUEVO: descripción -->
+          <!-- ✅ NUEVO: Descripción (justo abajo del nombre) -->
           <label>Descripción (opcional)</label>
-          <textarea id="newRecipeDesc" rows="2" placeholder="Ej: Aplicar con viento bajo. Mezclar en este orden..."></textarea>
+          <textarea id="newRecipeDesc" rows="2" placeholder="Ej: Orden de mezcla, advertencias, momento del día, etc."></textarea>
 
           <div class="card" style="background:rgba(255,255,255,.03); margin:12px 0 0; border-style:dashed;">
             <h2 style="margin:0 0 10px; font-size:13px; color:var(--muted);">Ingrediente (por 1 hectárea)</h2>
@@ -353,9 +350,9 @@
             <label>Nombre</label>
             <input id="adminName" />
 
-            <!-- NUEVO: descripción -->
+            <!-- ✅ NUEVO: Descripción en el editor -->
             <label>Descripción (opcional)</label>
-            <textarea id="adminDesc" rows="2"></textarea>
+            <textarea id="adminDesc" rows="2" placeholder="Notas/indicaciones para esta receta..."></textarea>
 
             <div class="card" style="background:rgba(255,255,255,.03); margin:12px 0 0; border-style:dashed;">
               <h2 style="margin:0 0 10px; font-size:13px; color:var(--muted);">Ingredientes (por 1 hectárea)</h2>
@@ -540,9 +537,9 @@ function renderCalcOutput(lines) {
 
 /* =========================
    CSV Export/Import
-   Format (compatible):
+   Nuevo formato compatible:
    recipe_id,recipe_name,recipe_desc,ingredient_name,qty,unit
-   - Si viene un CSV viejo SIN recipe_desc, se importa igual.
+   (si el CSV viejo NO tiene recipe_desc, igual se importa)
 ========================= */
 function recipesToCSV(recipes) {
   const header = ["recipe_id","recipe_name","recipe_desc","ingredient_name","qty","unit"];
@@ -577,6 +574,7 @@ function escapeCSV(s) {
 }
 
 function parseCSV(text) {
+  // Simple CSV parser for our schema (handles quoted strings)
   const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
   if (lines.length < 1) return [];
 
@@ -585,13 +583,13 @@ function parseCSV(text) {
   const idx = {
     recipe_id: header.indexOf("recipe_id"),
     recipe_name: header.indexOf("recipe_name"),
-    recipe_desc: header.indexOf("recipe_desc"), // puede ser -1 (CSV viejo)
+    recipe_desc: header.indexOf("recipe_desc"), // puede ser -1
     ingredient_name: header.indexOf("ingredient_name"),
     qty: header.indexOf("qty"),
     unit: header.indexOf("unit")
   };
 
-  // Requeridos mínimos (para CSV viejo)
+  // requeridos mínimos
   if (idx.recipe_id === -1 || idx.recipe_name === -1 || idx.ingredient_name === -1 || idx.qty === -1 || idx.unit === -1) {
     throw new Error("CSV inválido: faltan columnas.");
   }
@@ -610,7 +608,6 @@ function parseCSV(text) {
     }
     const r = map.get(rid);
 
-    // si vienen filas con name/desc diferentes, preferimos el último no-vacío
     if (rname) r.name = rname;
     if (idx.recipe_desc !== -1 && rdesc) r.desc = rdesc;
 
@@ -623,7 +620,6 @@ function parseCSV(text) {
     }
   }
 
-  // compat: si no hay desc en CSV, queda ""
   return Array.from(map.values()).map(r => ({
     id: r.id,
     name: r.name,
@@ -742,7 +738,6 @@ function renderAdminEditor(recipe) {
     msg.textContent = "Cambios guardados.";
     msg.className = "msg ok";
     refreshUI();
-    updateUseRecipeDesc(); // NUEVO
   };
 
   $("btnAdminDelete").onclick = () => {
@@ -755,33 +750,11 @@ function renderAdminEditor(recipe) {
     // reselect
     $("adminRecipeSelect").value = filtered[0]?.id || "";
     handleAdminSelect();
-    updateUseRecipeDesc(); // NUEVO
   };
 }
 
 function escapeHtml(s){
   return String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
-}
-
-/* =========================
-   NUEVO: Mostrar descripción en "Usar"
-========================= */
-function updateUseRecipeDesc() {
-  const recipes = loadRecipes();
-  const rid = $("useRecipeSelect").value;
-  const r = recipes.find(x => x.id === rid);
-
-  const box = $("useRecipeDesc");
-  if (!box) return;
-
-  const desc = (r && r.desc) ? String(r.desc).trim() : "";
-  if (desc) {
-    box.style.display = "block";
-    box.textContent = desc;
-  } else {
-    box.style.display = "none";
-    box.textContent = "";
-  }
 }
 
 /* =========================
@@ -795,7 +768,6 @@ function refreshUI() {
     if (!$("useRecipeSelect").value) $("useRecipeSelect").value = recipes[0].id;
     if (!$("adminRecipeSelect").value) $("adminRecipeSelect").value = recipes[0].id;
   }
-  updateUseRecipeDesc(); // NUEVO
 }
 
 /* =========================
@@ -806,10 +778,6 @@ $("tabBtnAdmin").onclick = () => {
   setActiveTab("admin");
   handleAdminSelect();
 };
-
-$("useRecipeSelect").addEventListener("change", () => {
-  updateUseRecipeDesc(); // NUEVO
-});
 
 $("btnAddIngredient").onclick = () => {
   const name = $("ingName").value.trim();
@@ -829,14 +797,14 @@ $("btnAddIngredient").onclick = () => {
 $("btnClearDraft").onclick = () => {
   draftIngredients = [];
   $("newRecipeName").value = "";
-  $("newRecipeDesc").value = ""; // NUEVO
+  $("newRecipeDesc").value = ""; /* ✅ NUEVO */
   $("saveMsg").textContent = "";
   renderDraftIngredients();
 };
 
 $("btnSaveRecipe").onclick = () => {
   const name = $("newRecipeName").value.trim();
-  const desc = $("newRecipeDesc").value.trim(); // NUEVO
+  const desc = $("newRecipeDesc").value.trim(); /* ✅ NUEVO */
 
   if (!name) { $("saveMsg").textContent="Poné un nombre de receta."; $("saveMsg").className="msg bad"; return; }
   if (draftIngredients.length === 0) { $("saveMsg").textContent="Agregá al menos 1 ingrediente."; $("saveMsg").className="msg bad"; return; }
@@ -845,7 +813,7 @@ $("btnSaveRecipe").onclick = () => {
   const newR = {
     id: uid(),
     name,
-    desc, // NUEVO
+    desc, /* ✅ NUEVO */
     ingredients: draftIngredients.map(x => ({ name: x.name, qty: Number(x.qty), unit: x.unit }))
   };
   recipes.push(newR);
@@ -856,7 +824,7 @@ $("btnSaveRecipe").onclick = () => {
   draftIngredients = [];
   renderDraftIngredients();
   $("newRecipeName").value = "";
-  $("newRecipeDesc").value = ""; // NUEVO
+  $("newRecipeDesc").value = ""; /* ✅ NUEVO */
 
   refreshUI();
 };
@@ -939,7 +907,7 @@ function handleAdminSelect() {
   const copy = {
     id: r.id,
     name: r.name,
-    desc: r.desc || "", // NUEVO
+    desc: r.desc || "", /* ✅ NUEVO */
     ingredients: (r.ingredients || []).map(i => ({ name: i.name, qty: i.qty, unit: i.unit }))
   };
   renderAdminEditor(copy);
