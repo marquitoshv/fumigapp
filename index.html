@@ -1,620 +1,916 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Recetas de Fumigación</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#111111">
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111" />
 
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#fafafa}
-    .wrap{max-width:820px;margin:0 auto;padding:16px}
-    h1{font-size:20px;margin:6px 0 12px}
-    .card{background:#fff;border:1px solid #e6e6e6;border-radius:14px;padding:14px;margin:10px 0;box-shadow:0 2px 10px rgba(0,0,0,.03)}
-    label{display:block;font-size:13px;margin:10px 0 4px;color:#333}
-    input,select{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;font-size:16px;box-sizing:border-box}
-    button{padding:10px 12px;border:0;border-radius:10px;font-size:15px}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .row > div{flex:1;min-width:140px}
-    .btn{background:#111;color:#fff}
-    .btn2{background:#f1f1f1}
-    .btnDanger{background:#b00020;color:#fff}
-    table{width:100%;border-collapse:collapse}
-    th,td{border-bottom:1px solid #eee;padding:10px;text-align:left;font-size:14px;vertical-align:top}
-    .small{font-size:12px;color:#666}
-    .dangerBox{background:#ffe9e9}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap}
-    .tabBtn{background:#f1f1f1}
-    .tabBtn.active{background:#111;color:#fff}
-    .hidden{display:none}
-    .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#f1f1f1;font-size:12px;margin-left:6px}
+    :root{
+      --bg:#0b0b0b;
+      --card:#111;
+      --card2:#151515;
+      --text:#f4f4f4;
+      --muted:#bdbdbd;
+      --line:#242424;
+      --ok:#27c07d;
+      --bad:#ff5b5b;
+      --btn:#f4f4f4;
+      --btnText:#111;
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: linear-gradient(180deg, #070707, #0b0b0b);
+      color:var(--text);
+    }
+    .wrap{
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px;
+      padding-bottom: 88px;
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin: 6px 0 14px;
+    }
+    h1{
+      font-size: 18px;
+      margin:0;
+      letter-spacing:.2px;
+    }
+    .pill{
+      font-size:12px;
+      color:var(--muted);
+      padding: 6px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background: rgba(255,255,255,.03);
+      white-space:nowrap;
+    }
+    .card{
+      background: rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin: 12px 0;
+      backdrop-filter: blur(6px);
+    }
+    .card h2{
+      font-size: 14px;
+      margin:0 0 10px;
+      color: var(--text);
+    }
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin: 10px 0 6px;
+    }
+    input, select, textarea{
+      width:100%;
+      background: rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      color:var(--text);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+      outline:none;
+    }
+    input:focus, select:focus, textarea:focus{
+      border-color: rgba(255,255,255,.25);
+    }
+    .row{
+      display:flex;
+      gap:10px;
+    }
+    .row > *{flex:1}
+    button{
+      border:0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+      cursor:pointer;
+    }
+    .btn{
+      background: var(--btn);
+      color: var(--btnText);
+      font-weight: 600;
+    }
+    .btn2{
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border:1px solid var(--line);
+    }
+    .btnDanger{
+      background: rgba(255,91,91,.12);
+      color: #ff8b8b;
+      border:1px solid rgba(255,91,91,.35);
+    }
+    .btnOk{
+      background: rgba(39,192,125,.12);
+      color:#7ff0be;
+      border:1px solid rgba(39,192,125,.35);
+    }
+    .msg{
+      margin-top:10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .msg.bad{color: var(--bad)}
+    .msg.ok{color: var(--ok)}
+
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top: 10px;
+    }
+    .item{
+      padding: 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.03);
+    }
+    .itemTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+    }
+    .itemTitle{
+      font-size: 14px;
+      margin:0;
+      font-weight: 700;
+    }
+    .itemMeta{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .itemBtns{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .ingredients{
+      margin-top:10px;
+      border-top:1px dashed rgba(255,255,255,.12);
+      padding-top:10px;
+      display:grid;
+      gap:6px;
+    }
+    .ingRow{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .ingRow span:last-child{color: var(--muted)}
+    .hint{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.35;
+    }
+
+    /* Bottom tabs */
+    .tabs{
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10,10,10,.9);
+      border-top:1px solid var(--line);
+      backdrop-filter: blur(8px);
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    }
+    .tabsInner{
+      max-width: 900px;
+      margin: 0 auto;
+      display:flex;
+      gap:10px;
+    }
+    .tabBtn{
+      flex:1;
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .tabBtn.active{
+      background: var(--btn);
+      color: var(--btnText);
+      border-color: transparent;
+    }
+
+    /* License wall */
+    #licenseWall{
+      display:none;
+      max-width:520px;
+      margin: 60px auto;
+      padding: 16px;
+      background: rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      border-radius: 18px;
+    }
+    #licenseWall h2{margin:0 0 10px; font-size: 18px;}
   </style>
 </head>
+
 <body>
 
-<div id="licenseWall" style="display:none; max-width:520px; margin:40px auto; padding:16px; background:#fff; border-radius:14px; border:1px solid #e6e6e6;">
-  <h2>🔒 Activación</h2>
-  <input id="licenseCodeInput" placeholder="Código de activación" style="width:100%; padding:10px;">
-  <button id="licenseActivateBtn" style="margin-top:10px; width:100%;">Activar</button>
-  <div id="licenseMsg" style="color:#b00020; margin-top:10px;"></div>
-</div>
+  <!-- LICENSE WALL -->
+  <div id="licenseWall">
+    <h2>🔒 Activación</h2>
+    <div class="hint">Ingresá tu código para activar esta app en este dispositivo.</div>
 
-<div id="appRoot" style="display:none;">
+    <label for="licenseCodeInput">Código</label>
+    <input id="licenseCodeInput" placeholder="Ej: AGRO-1A2B-3C4D" />
 
-<div class="wrap">
-  <h1>🌾 Recetas de fumigación (por ha)</h1>
+    <button id="licenseActivateBtn" class="btn" style="margin-top:10px; width:100%;">Activar</button>
+    <div id="licenseMsg" class="msg bad"></div>
+  </div>
 
-  <!-- Tabs -->
-  <div class="card">
+  <!-- APP ROOT -->
+  <div id="appRoot" style="display:none;">
+    <div class="wrap">
+      <header>
+        <h1>🌾 Recetas de Fumigación</h1>
+        <div class="pill" id="recipesCountPill">0 recetas</div>
+      </header>
+
+      <!-- TAB: USAR -->
+      <section id="tabUse">
+        <div class="card">
+          <h2>Usar receta</h2>
+
+          <label>Receta</label>
+          <select id="useRecipeSelect"></select>
+
+          <div class="row">
+            <div>
+              <label>Hectáreas</label>
+              <input id="useHectares" type="number" inputmode="decimal" min="0" step="0.01" placeholder="Ej: 5" />
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button id="btnCalculate" class="btn" style="width:100%;">Calcular</button>
+            </div>
+          </div>
+
+          <div id="calcOutput" class="ingredients" style="display:none;"></div>
+          <div id="calcMsg" class="msg"></div>
+        </div>
+
+        <div class="card">
+          <h2>Nueva receta</h2>
+
+          <label>Nombre de la receta</label>
+          <input id="newRecipeName" placeholder="Ej: Soja - Malezas" />
+
+          <div class="card" style="background:rgba(255,255,255,.03); margin:12px 0 0; border-style:dashed;">
+            <h2 style="margin:0 0 10px; font-size:13px; color:var(--muted);">Ingrediente (por 1 hectárea)</h2>
+            <div class="row">
+              <div>
+                <label>Nombre</label>
+                <input id="ingName" placeholder="Ej: Glifosato" />
+              </div>
+              <div>
+                <label>Cantidad</label>
+                <input id="ingQty" type="number" inputmode="decimal" step="0.001" placeholder="Ej: 2" />
+              </div>
+              <div>
+                <label>Unidad</label>
+                <select id="ingUnit">
+                  <option value="L">L</option>
+                  <option value="mL">mL</option>
+                  <option value="kg">kg</option>
+                  <option value="g">g</option>
+                  <option value="cc">cc</option>
+                  <option value="unid">unid</option>
+                </select>
+              </div>
+            </div>
+            <button id="btnAddIngredient" class="btn2" style="margin-top:10px; width:100%;">Agregar ingrediente</button>
+            <div class="hint">Tip: cargás ingredientes por hectárea. Luego la app escala automáticamente según las hectáreas.</div>
+          </div>
+
+          <div class="card" style="background:rgba(255,255,255,.02); border:1px solid var(--line); margin:12px 0 0;">
+            <h2 style="margin:0 0 10px; font-size:13px; color:var(--muted);">Ingredientes cargados</h2>
+            <div id="newIngredientsList" class="ingredients"></div>
+            <div class="row" style="margin-top:10px;">
+              <button id="btnClearDraft" class="btn2">Limpiar</button>
+              <button id="btnSaveRecipe" class="btn">Guardar receta</button>
+            </div>
+            <div id="saveMsg" class="msg"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Backup (CSV)</h2>
+          <div class="row">
+            <button id="btnExportCSV" class="btn2">Exportar CSV</button>
+            <label class="btn2" style="display:flex; align-items:center; justify-content:center; cursor:pointer;">
+              Importar CSV
+              <input id="importCSVFile" type="file" accept=".csv" style="display:none;" />
+            </label>
+          </div>
+          <div id="csvMsg" class="msg"></div>
+        </div>
+      </section>
+
+      <!-- TAB: ADMIN (editar/borrar) -->
+      <section id="tabAdmin" style="display:none;">
+        <div class="card">
+          <h2>Editar / Borrar recetas</h2>
+          <div class="hint">Seleccioná una receta para editar nombre o ingredientes, o borrarla.</div>
+
+          <label>Receta</label>
+          <select id="adminRecipeSelect"></select>
+
+          <div id="adminEditor" style="display:none; margin-top:10px;">
+            <label>Nombre</label>
+            <input id="adminName" />
+
+            <div class="card" style="background:rgba(255,255,255,.03); margin:12px 0 0; border-style:dashed;">
+              <h2 style="margin:0 0 10px; font-size:13px; color:var(--muted);">Ingredientes (por 1 hectárea)</h2>
+              <div id="adminIngredients" class="ingredients"></div>
+
+              <div class="row" style="margin-top:10px;">
+                <button id="btnAdminAddRow" class="btn2">+ Ingrediente</button>
+                <button id="btnAdminSave" class="btnOk">Guardar cambios</button>
+              </div>
+              <button id="btnAdminDelete" class="btnDanger" style="margin-top:10px; width:100%;">Borrar receta</button>
+              <div id="adminMsg" class="msg"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
     <div class="tabs">
-      <button class="tabBtn active" id="tab-create" type="button">➕ Crear</button>
-      <button class="tabBtn" id="tab-use" type="button">📌 Usar</button>
-      <button class="tabBtn" id="tab-manage" type="button">✏️ Editar / Borrar</button>
-      <button class="tabBtn" id="tab-csv" type="button">📄 CSV</button>
-    </div>
-    <div class="small" style="margin-top:10px">
-      Las recetas se guardan en el teléfono. Para ver el CSV como archivo, usá la pestaña <b>CSV</b> → <b>Exportar</b>.
-    </div>
-  </div>
-
-  <!-- CREATE -->
-  <div class="card" id="page-create">
-    <h2 style="font-size:16px;margin:0 0 10px">➕ Crear receta</h2>
-
-    <label>Nombre de la receta</label>
-    <input id="recipeName" placeholder="Ej: Soja - Malezas"/>
-
-    <div class="row">
-      <div>
-        <label>Ingrediente / Producto</label>
-        <input id="ing" placeholder="Ej: Glifosato"/>
-      </div>
-      <div>
-        <label>Cantidad por ha</label>
-        <input id="qty" type="number" step="0.01" placeholder="Ej: 2.5"/>
-      </div>
-      <div>
-        <label>Unidad</label>
-        <select id="unit">
-          <option>L</option><option>ml</option><option>kg</option><option>g</option><option>cc</option>
-        </select>
+      <div class="tabsInner">
+        <button class="tabBtn active" id="tabBtnUse">Usar</button>
+        <button class="tabBtn" id="tabBtnAdmin">Editar</button>
       </div>
     </div>
-
-    <div class="row" style="margin-top:10px">
-      <button class="btn2" id="addIng" type="button">Agregar ingrediente</button>
-      <button class="btn" id="saveRecipe" type="button">Guardar receta</button>
-    </div>
-
-    <div id="draftArea" style="margin-top:10px"></div>
   </div>
-
-  <!-- USE -->
-  <div class="card hidden" id="page-use">
-    <h2 style="font-size:16px;margin:0 0 10px">📌 Usar receta</h2>
-
-    <label>Elegir receta</label>
-    <select id="selectRecipeUse"></select>
-
-    <label>Hectáreas a fumigar</label>
-    <input id="hectares" type="number" step="0.1" value="1"/>
-
-    <div style="margin-top:10px" class="row">
-      <button class="btn" id="calc" type="button">Calcular</button>
-    </div>
-
-    <div id="resultArea" style="margin-top:10px"></div>
-  </div>
-
-  <!-- MANAGE -->
-  <div class="card hidden" id="page-manage">
-    <h2 style="font-size:16px;margin:0 0 10px">✏️ Editar / Borrar recetas</h2>
-
-    <label>Elegir receta</label>
-    <select id="selectRecipeManage"></select>
-
-    <div id="manageArea" style="margin-top:10px"></div>
-
-    <div class="row" style="margin-top:10px">
-      <button class="btn2" id="addRowManage" type="button">+ Agregar ingrediente</button>
-      <button class="btn" id="saveManage" type="button">Guardar cambios</button>
-      <button class="btnDanger" id="deleteRecipe" type="button">Borrar receta completa</button>
-    </div>
-
-    <div class="small" style="margin-top:8px">
-      Tip: si querés “limpiar” nombres, editá el nombre de receta desde CSV (exportar → editar → importar).
-    </div>
-  </div>
-
-  <!-- CSV -->
-  <div class="card hidden" id="page-csv">
-    <h2 style="font-size:16px;margin:0 0 10px">📄 CSV</h2>
-
-    <div class="row">
-      <button class="btn2" id="exportCsv" type="button">Exportar CSV</button>
-      <button class="btn2" id="importBtn" type="button">Importar CSV</button>
-      <input id="importCsv" type="file" accept=".csv" style="display:none">
-    </div>
-
-    <div class="small" style="margin-top:8px">
-      Android: el archivo exportado queda en <b>Descargas</b>. iPhone: se guarda en la app <b>Archivos</b>.
-    </div>
-  </div>
-
-  <div class="card dangerBox">
-    <b>⚠️ Seguridad</b>
-    <div class="small">
-      Esta app solo calcula cantidades. Siempre seguir etiqueta, receta agronómica, compatibilidad, clima, EPP y normativa local.
-    </div>
-  </div>
-</div>
 
 <script>
-  // -------------------------
-  // Storage
-  // -------------------------
-  const KEY = "fumig_recipes_v1";
-  const state = { draft: [], recipes: load() };
+/* =========================
+   PWA install + SW
+========================= */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  });
+}
 
-  function load(){
-    try { return JSON.parse(localStorage.getItem(KEY)) || []; }
-    catch { return []; }
+/* =========================
+   Storage
+========================= */
+const STORE_KEY = "fumig_recipes_v1";
+
+function loadRecipes() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
   }
-  function save(){
-    localStorage.setItem(KEY, JSON.stringify(state.recipes));
+}
+
+function saveRecipes(recipes) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(recipes));
+}
+
+function uid() {
+  return "r_" + Math.random().toString(16).slice(2) + Date.now().toString(16);
+}
+
+/* =========================
+   UI helpers
+========================= */
+function $(id){ return document.getElementById(id); }
+
+function setActiveTab(tab) {
+  const use = $("tabUse");
+  const admin = $("tabAdmin");
+  const bUse = $("tabBtnUse");
+  const bAdmin = $("tabBtnAdmin");
+
+  if (tab === "admin") {
+    use.style.display = "none";
+    admin.style.display = "block";
+    bUse.classList.remove("active");
+    bAdmin.classList.add("active");
+  } else {
+    use.style.display = "block";
+    admin.style.display = "none";
+    bUse.classList.add("active");
+    bAdmin.classList.remove("active");
+  }
+}
+
+/* =========================
+   Draft new recipe
+========================= */
+let draftIngredients = [];
+
+function renderDraftIngredients() {
+  const box = $("newIngredientsList");
+  box.innerHTML = "";
+
+  if (draftIngredients.length === 0) {
+    box.innerHTML = `<div class="hint">Todavía no agregaste ingredientes.</div>`;
+    return;
   }
 
-  // -------------------------
-  // Helpers
-  // -------------------------
-  function escapeHtml(str){
-    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-  }
-
-  function roundHuman(x){
-    const n = Number(x);
-    if(!isFinite(n)) return x;
-    if(Math.abs(n) >= 100) return n.toFixed(1);
-    if(Math.abs(n) >= 10) return n.toFixed(2);
-    return n.toFixed(3);
-  }
-
-  function recipeNames(){
-    return [...new Set(state.recipes.map(r => (r.recipe_name || "").trim()).filter(Boolean))].sort();
-  }
-
-  function rowsForRecipe(name){
-    return state.recipes.filter(r => (r.recipe_name || "").trim() === name);
-  }
-
-  // -------------------------
-  // Tabs
-  // -------------------------
-  const pages = {
-    create: document.getElementById("page-create"),
-    use: document.getElementById("page-use"),
-    manage: document.getElementById("page-manage"),
-    csv: document.getElementById("page-csv"),
-  };
-
-  function setActiveTab(which){
-    // buttons
-    document.querySelectorAll(".tabBtn").forEach(b=>b.classList.remove("active"));
-    document.getElementById(`tab-${which}`).classList.add("active");
-    // pages
-    Object.values(pages).forEach(p=>p.classList.add("hidden"));
-    pages[which].classList.remove("hidden");
-    // refresh dropdowns when switching
-    renderSelects();
-    if(which === "manage") renderManageTable();
-  }
-
-  document.getElementById("tab-create").onclick = ()=>setActiveTab("create");
-  document.getElementById("tab-use").onclick = ()=>setActiveTab("use");
-  document.getElementById("tab-manage").onclick = ()=>setActiveTab("manage");
-  document.getElementById("tab-csv").onclick = ()=>setActiveTab("csv");
-
-  // -------------------------
-  // Create (draft)
-  // -------------------------
-  const recipeNameEl = document.getElementById("recipeName");
-  const ingEl = document.getElementById("ing");
-  const qtyEl = document.getElementById("qty");
-  const unitEl = document.getElementById("unit");
-  const draftArea = document.getElementById("draftArea");
-
-  function renderDraft(){
-    if(state.draft.length === 0){
-      draftArea.innerHTML = `<div class="small">No agregaste ingredientes todavía.</div>`;
-      return;
-    }
-    draftArea.innerHTML = `
-      <div class="small">Ingredientes cargados <span class="pill">${state.draft.length}</span></div>
-      <table style="margin-top:8px">
-        <thead><tr><th>Ingrediente</th><th>Por ha</th><th></th></tr></thead>
-        <tbody>
-          ${state.draft.map((r,i)=>`
-            <tr>
-              <td>${escapeHtml(r.ingredient)}</td>
-              <td>${escapeHtml(r.qty_per_ha)} ${escapeHtml(r.unit)}</td>
-              <td><button class="btn2" type="button" onclick="removeDraft(${i})">Quitar</button></td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
+  draftIngredients.forEach((ing, idx) => {
+    const row = document.createElement("div");
+    row.className = "ingRow";
+    row.innerHTML = `
+      <span>${ing.name}</span>
+      <span>${ing.qty} ${ing.unit} <button class="btn2" data-rm="${idx}" style="padding:6px 10px; margin-left:8px;">Quitar</button></span>
     `;
-  }
-  window.removeDraft = (i)=>{ state.draft.splice(i,1); renderDraft(); };
-
-  document.getElementById("addIng").onclick = ()=>{
-    const ingredient = ingEl.value.trim();
-    const qty = Number(qtyEl.value);
-    const unit = unitEl.value.trim();
-
-    if(!ingredient || !unit || !isFinite(qty) || qty <= 0){
-      alert("Completá ingrediente, unidad y cantidad (> 0).");
-      return;
-    }
-    state.draft.push({ ingredient, qty_per_ha: qty, unit });
-    ingEl.value = "";
-    qtyEl.value = "";
-    renderDraft();
-  };
-
-  document.getElementById("saveRecipe").onclick = ()=>{
-    const name = recipeNameEl.value.trim();
-    if(!name){ alert("Poné un nombre de receta."); return; }
-    if(state.draft.length === 0){ alert("Agregá al menos 1 ingrediente."); return; }
-
-    state.draft.forEach(r=>{
-      state.recipes.push({
-        recipe_name: name,
-        ingredient: r.ingredient,
-        qty_per_ha: Number(r.qty_per_ha),
-        unit: r.unit
-      });
-    });
-
-    save();
-    state.draft = [];
-    recipeNameEl.value = "";
-    renderDraft();
-    renderSelects();
-    alert("Receta guardada ✅");
-  };
-
-  // -------------------------
-  // Use
-  // -------------------------
-  const selectUse = document.getElementById("selectRecipeUse");
-  const hectaresEl = document.getElementById("hectares");
-  const resultArea = document.getElementById("resultArea");
-
-  document.getElementById("calc").onclick = ()=>{
-    const name = selectUse.value;
-    const ha = Number(hectaresEl.value);
-
-    if(!name || name === "(Sin recetas)"){ alert("No hay receta seleccionada."); return; }
-    if(!isFinite(ha) || ha <= 0){ alert("Hectáreas debe ser > 0."); return; }
-
-    const rows = rowsForRecipe(name);
-    if(rows.length === 0){
-      resultArea.innerHTML = `<div class="small">No hay ingredientes en esta receta.</div>`;
-      return;
-    }
-
-    const out = rows.map(r => ({
-      ingredient: r.ingredient,
-      total: Number(r.qty_per_ha) * ha,
-      unit: r.unit,
-      per_ha: r.qty_per_ha
-    }));
-
-    resultArea.innerHTML = `
-      <div class="small">Receta: <b>${escapeHtml(name)}</b> — Hectáreas: <b>${ha}</b></div>
-      <table style="margin-top:8px">
-        <thead><tr><th>Ingrediente</th><th>Total</th><th>Por ha</th></tr></thead>
-        <tbody>
-          ${out.map(r=>`
-            <tr>
-              <td>${escapeHtml(r.ingredient)}</td>
-              <td><b>${roundHuman(r.total)} ${escapeHtml(r.unit)}</b></td>
-              <td>${roundHuman(r.per_ha)} ${escapeHtml(r.unit)}</td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    `;
-  };
-
-  // -------------------------
-  // Manage (edit/delete)
-  // -------------------------
-  const selectManage = document.getElementById("selectRecipeManage");
-  const manageArea = document.getElementById("manageArea");
-
-  function renderManageTable(){
-    const name = selectManage.value;
-    if(!name || name === "(Sin recetas)"){
-      manageArea.innerHTML = `<div class="small">No hay recetas para editar.</div>`;
-      return;
-    }
-
-    const rows = rowsForRecipe(name);
-    if(rows.length === 0){
-      manageArea.innerHTML = `<div class="small">Esta receta no tiene ingredientes.</div>`;
-      return;
-    }
-
-    manageArea.innerHTML = `
-      <div class="small">Editá cantidades/unidades o eliminá filas. Después tocá <b>Guardar cambios</b>.</div>
-      <table style="margin-top:8px">
-        <thead><tr><th>Ingrediente</th><th>Cantidad/ha</th><th>Unidad</th><th></th></tr></thead>
-        <tbody>
-          ${rows.map((r,i)=>`
-            <tr>
-              <td><input data-edit="ingredient" data-i="${i}" value="${escapeHtml(r.ingredient)}"></td>
-              <td><input data-edit="qty_per_ha" data-i="${i}" type="number" step="0.01" value="${escapeHtml(r.qty_per_ha)}"></td>
-              <td>
-                <select data-edit="unit" data-i="${i}">
-                  ${["L","ml","kg","g","cc"].map(u => `<option ${u===r.unit?"selected":""}>${u}</option>`).join("")}
-                </select>
-              </td>
-              <td><button class="btn2" type="button" onclick="removeManageRow(${i})">Borrar fila</button></td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    `;
-  }
-
-  window.removeManageRow = (i)=>{
-    const name = selectManage.value;
-    const rows = rowsForRecipe(name);
-
-    if(rows.length <= 1){
-      alert("No podés dejar la receta sin ingredientes. Usá 'Borrar receta completa' si querés eliminarla.");
-      return;
-    }
-
-    // Borra la i-ésima fila SOLO dentro de esa receta
-    let count = -1;
-    state.recipes = state.recipes.filter(r=>{
-      if((r.recipe_name || "").trim() !== name) return true;
-      count++;
-      return count !== i;
-    });
-
-    save();
-    renderSelects();
-    renderManageTable();
-  };
-
-  document.getElementById("addRowManage").onclick = ()=>{
-    const name = selectManage.value;
-    if(!name || name === "(Sin recetas)"){ alert("No hay receta seleccionada."); return; }
-
-    state.recipes.push({
-      recipe_name: name,
-      ingredient: "Nuevo ingrediente",
-      qty_per_ha: 1,
-      unit: "L"
-    });
-    save();
-    renderSelects();
-    renderManageTable();
-  };
-
-  document.getElementById("saveManage").onclick = ()=>{
-    const name = selectManage.value;
-    if(!name || name === "(Sin recetas)"){ return; }
-
-    const rows = rowsForRecipe(name);
-    if(rows.length === 0){ return; }
-
-    // Lee inputs y aplica
-    const edits = {};
-    manageArea.querySelectorAll("[data-edit]").forEach(el=>{
-      const idx = Number(el.getAttribute("data-i"));
-      const field = el.getAttribute("data-edit");
-      if(!edits[idx]) edits[idx] = {};
-      edits[idx][field] = el.value;
-    });
-
-    // Aplica cambios recorriendo state.recipes (solo para esa receta)
-    let localIdx = -1;
-    state.recipes = state.recipes.map(r=>{
-      if((r.recipe_name || "").trim() !== name) return r;
-      localIdx++;
-      const e = edits[localIdx] || {};
-
-      const ingredient = (e.ingredient ?? r.ingredient).trim();
-      const qty = Number(e.qty_per_ha ?? r.qty_per_ha);
-      const unit = (e.unit ?? r.unit).trim();
-
-      if(!ingredient) { alert("Ingrediente vacío. Corregilo antes de guardar."); throw new Error("ingredient empty"); }
-      if(!isFinite(qty) || qty <= 0) { alert("Cantidad/ha inválida. Debe ser > 0."); throw new Error("qty invalid"); }
-      if(!unit) { alert("Unidad vacía. Corregilo antes de guardar."); throw new Error("unit empty"); }
-
-      return { ...r, ingredient, qty_per_ha: qty, unit };
-    });
-
-    save();
-    renderSelects();
-    renderManageTable();
-    alert("Cambios guardados ✅");
-  };
-
-  document.getElementById("deleteRecipe").onclick = ()=>{
-    const name = selectManage.value;
-    if(!name || name === "(Sin recetas)") return;
-    if(!confirm(`¿Borrar la receta completa "${name}"?`)) return;
-
-    state.recipes = state.recipes.filter(r => (r.recipe_name || "").trim() !== name);
-    save();
-    renderSelects();
-    renderManageTable();
-    alert("Receta borrada ✅");
-  };
-
-  selectManage.onchange = ()=>renderManageTable();
-
-  // -------------------------
-  // CSV (export/import)  ✅ sin preview en pantalla
-  // -------------------------
-  const importCsv = document.getElementById("importCsv");
-
-  function csvEscape(s){
-    const str = String(s ?? "");
-    if(/[",\n]/.test(str)) return `"${str.replace(/"/g,'""')}"`;
-    return str;
-  }
-
-  function buildCsvText(){
-    const header = "recipe_name,ingredient,qty_per_ha,unit\n";
-    const lines = state.recipes.map(r =>
-      `${csvEscape(r.recipe_name)},${csvEscape(r.ingredient)},${Number(r.qty_per_ha)},${csvEscape(r.unit)}`
-    ).join("\n");
-    return header + lines + (lines ? "\n" : "");
-  }
-
-  document.getElementById("exportCsv").onclick = ()=>{
-    const text = buildCsvText();
-    const blob = new Blob([text], {type:"text/csv;charset=utf-8"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "recetas.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  document.getElementById("importBtn").onclick = ()=> importCsv.click();
-
-  importCsv.addEventListener("change", async (e)=>{
-    const file = e.target.files[0];
-    if(!file) return;
-
-    const text = await file.text();
-    const rows = parseCsv(text);
-
-    const imported = [];
-    for(const r of rows){
-      if(!r.recipe_name || !r.ingredient || !r.unit) continue;
-      const qty = Number(r.qty_per_ha);
-      if(!isFinite(qty) || qty <= 0) continue;
-      imported.push({
-        recipe_name: String(r.recipe_name).trim(),
-        ingredient: String(r.ingredient).trim(),
-        qty_per_ha: qty,
-        unit: String(r.unit).trim()
-      });
-    }
-
-    if(imported.length === 0){
-      alert("No se importó nada. Asegurate de que el CSV tenga: recipe_name, ingredient, qty_per_ha, unit");
-      e.target.value = "";
-      return;
-    }
-
-    state.recipes = state.recipes.concat(imported);
-    save();
-    renderSelects();
-    if(!pages.manage.classList.contains("hidden")) renderManageTable();
-    alert(`Importado ✅ (${imported.length} filas)`);
-    e.target.value = "";
+    box.appendChild(row);
   });
 
-  function parseCsv(text){
-    const lines = text.replace(/\r/g,"").split("\n").filter(x=>x.trim().length);
-    if(lines.length < 2) return [];
+  box.querySelectorAll("button[data-rm]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const i = Number(btn.getAttribute("data-rm"));
+      draftIngredients.splice(i,1);
+      renderDraftIngredients();
+    });
+  });
+}
 
-    const headers = splitCsvLine(lines[0]).map(h=>h.trim());
-    const out = [];
+/* =========================
+   Recipes render
+========================= */
+function renderRecipeSelects(recipes) {
+  const useSel = $("useRecipeSelect");
+  const adminSel = $("adminRecipeSelect");
 
-    for(let i=1;i<lines.length;i++){
-      const cells = splitCsvLine(lines[i]);
-      const obj = {};
-      headers.forEach((h,idx)=> obj[h] = (cells[idx] ?? "").trim());
-      for(const k of Object.keys(obj)){
-        obj[k] = obj[k].replace(/^"|"$/g,"").replace(/""/g,'"');
-      }
-      out.push(obj);
+  function fill(sel) {
+    sel.innerHTML = "";
+    if (recipes.length === 0) {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "No hay recetas (creá una)";
+      sel.appendChild(opt);
+      sel.disabled = true;
+    } else {
+      sel.disabled = false;
+      recipes
+        .slice()
+        .sort((a,b)=>a.name.localeCompare(b.name))
+        .forEach(r => {
+          const opt = document.createElement("option");
+          opt.value = r.id;
+          opt.textContent = r.name;
+          sel.appendChild(opt);
+        });
     }
-    return out;
   }
 
-  function splitCsvLine(line){
-    const res = [];
-    let cur="", inQ=false;
-    for(let i=0;i<line.length;i++){
-      const ch=line[i];
-      if(ch === '"' ){
-        if(inQ && line[i+1]==='"'){ cur+='"'; i++; }
-        else inQ = !inQ;
-      } else if(ch === "," && !inQ){
-        res.push(cur); cur="";
-      } else cur+=ch;
+  fill(useSel);
+  fill(adminSel);
+
+  $("recipesCountPill").textContent = `${recipes.length} receta${recipes.length===1?"":"s"}`;
+}
+
+/* =========================
+   Calculate
+========================= */
+function formatNumber(n) {
+  // mantén 3 decimales si hace falta, si no, corta lindo
+  const x = Number(n);
+  if (!isFinite(x)) return "";
+  const abs = Math.abs(x);
+  const decimals = abs >= 10 ? 2 : abs >= 1 ? 3 : 4;
+  return x.toFixed(decimals).replace(/\.?0+$/,"");
+}
+
+function calculateForHectares(recipe, ha) {
+  return recipe.ingredients.map(ing => ({
+    name: ing.name,
+    qty: Number(ing.qty) * ha,
+    unit: ing.unit
+  }));
+}
+
+function renderCalcOutput(lines) {
+  const out = $("calcOutput");
+  out.style.display = "grid";
+  out.innerHTML = "";
+  lines.forEach(l => {
+    const row = document.createElement("div");
+    row.className = "ingRow";
+    row.innerHTML = `<span>${l.name}</span><span>${formatNumber(l.qty)} ${l.unit}</span>`;
+    out.appendChild(row);
+  });
+}
+
+/* =========================
+   CSV Export/Import
+   Format:
+   recipe_id,recipe_name,ingredient_name,qty,unit
+========================= */
+function recipesToCSV(recipes) {
+  const header = ["recipe_id","recipe_name","ingredient_name","qty","unit"];
+  const rows = [header.join(",")];
+
+  recipes.forEach(r => {
+    r.ingredients.forEach(ing => {
+      const line = [
+        r.id,
+        escapeCSV(r.name),
+        escapeCSV(ing.name),
+        ing.qty,
+        ing.unit
+      ].join(",");
+      rows.push(line);
+    });
+    if (r.ingredients.length === 0) {
+      // allow empty recipe
+      rows.push([r.id, escapeCSV(r.name), "", "", ""].join(","));
     }
-    res.push(cur);
-    return res;
+  });
+
+  return rows.join("\n");
+}
+
+function escapeCSV(s) {
+  const str = String(s ?? "");
+  if (/[,"\n]/.test(str)) return `"${str.replaceAll('"','""')}"`;
+  return str;
+}
+
+function parseCSV(text) {
+  // Simple CSV parser for our schema (handles quoted strings)
+  const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+  if (lines.length < 1) return [];
+  const header = splitCSVLine(lines[0]);
+  const idx = {
+    recipe_id: header.indexOf("recipe_id"),
+    recipe_name: header.indexOf("recipe_name"),
+    ingredient_name: header.indexOf("ingredient_name"),
+    qty: header.indexOf("qty"),
+    unit: header.indexOf("unit")
+  };
+  if (Object.values(idx).some(v => v === -1)) throw new Error("CSV inválido: faltan columnas.");
+
+  const map = new Map();
+  for (let i=1;i<lines.length;i++){
+    const cols = splitCSVLine(lines[i]);
+    const rid = cols[idx.recipe_id] || "";
+    const rname = cols[idx.recipe_name] || "";
+    if (!rid) continue;
+
+    if (!map.has(rid)) {
+      map.set(rid, { id: rid, name: rname, ingredients: [] });
+    }
+    const r = map.get(rid);
+
+    const iname = cols[idx.ingredient_name] || "";
+    const qty = cols[idx.qty];
+    const unit = cols[idx.unit] || "";
+
+    if (iname && qty && unit) {
+      r.ingredients.push({ name: iname, qty: Number(qty), unit });
+    }
   }
+  return Array.from(map.values());
+}
 
-  // -------------------------
-  // Render selects
-  // -------------------------
-  function renderSelects(){
-    const names = recipeNames();
-    const html = names.length
-      ? names.map(n=>`<option>${escapeHtml(n)}</option>`).join("")
-      : `<option>(Sin recetas)</option>`;
+function splitCSVLine(line) {
+  const out = [];
+  let cur = "";
+  let inQ = false;
 
-    const currentUse = selectUse.value;
-    const currentManage = selectManage.value;
-
-    selectUse.innerHTML = html;
-    selectManage.innerHTML = html;
-
-    // Keep selection if still exists
-    if(names.includes(currentUse)) selectUse.value = currentUse;
-    if(names.includes(currentManage)) selectManage.value = currentManage;
+  for (let i=0;i<line.length;i++){
+    const ch = line[i];
+    if (inQ) {
+      if (ch === '"') {
+        if (line[i+1] === '"') { cur += '"'; i++; }
+        else inQ = false;
+      } else cur += ch;
+    } else {
+      if (ch === '"') inQ = true;
+      else if (ch === ',') { out.push(cur); cur = ""; }
+      else cur += ch;
+    }
   }
+  out.push(cur);
+  return out;
+}
 
-  // Init
-  renderDraft();
-  renderSelects();
-</script>
+/* =========================
+   Admin editor
+========================= */
+function renderAdminEditor(recipe) {
+  const editor = $("adminEditor");
+  const box = $("adminIngredients");
+  const msg = $("adminMsg");
+  msg.textContent = "";
 
-<!-- Registrar Service Worker -->
-<script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", async () => {
-      try { await navigator.serviceWorker.register("./sw.js"); } catch (e) {}
+  if (!recipe) {
+    editor.style.display = "none";
+    return;
+  }
+  editor.style.display = "block";
+  $("adminName").value = recipe.name;
+
+  function draw() {
+    box.innerHTML = "";
+    recipe.ingredients.forEach((ing, idx) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.style.alignItems = "center";
+      row.innerHTML = `
+        <input data-f="name" data-i="${idx}" value="${escapeHtml(ing.name)}" placeholder="Ingrediente" />
+        <input data-f="qty" data-i="${idx}" type="number" step="0.001" inputmode="decimal" value="${ing.qty}" placeholder="Cant." />
+        <select data-f="unit" data-i="${idx}">
+          ${["L","mL","kg","g","cc","unid"].map(u => `<option value="${u}" ${u===ing.unit?"selected":""}>${u}</option>`).join("")}
+        </select>
+        <button class="btnDanger" data-rm="${idx}" style="padding:10px 12px;">Quitar</button>
+      `;
+      box.appendChild(row);
+    });
+
+    box.querySelectorAll("button[data-rm]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = Number(btn.getAttribute("data-rm"));
+        recipe.ingredients.splice(i,1);
+        draw();
+      });
+    });
+
+    // live update fields
+    box.querySelectorAll("input[data-f], select[data-f]").forEach(el => {
+      el.addEventListener("input", () => {
+        const i = Number(el.getAttribute("data-i"));
+        const f = el.getAttribute("data-f");
+        if (f === "qty") recipe.ingredients[i][f] = Number(el.value);
+        else recipe.ingredients[i][f] = el.value;
+      });
+      el.addEventListener("change", () => {
+        const i = Number(el.getAttribute("data-i"));
+        const f = el.getAttribute("data-f");
+        if (f === "qty") recipe.ingredients[i][f] = Number(el.value);
+        else recipe.ingredients[i][f] = el.value;
+      });
     });
   }
-</script>
 
-</div>
+  draw();
 
-<script>
+  $("btnAdminAddRow").onclick = () => {
+    recipe.ingredients.push({ name: "", qty: 0, unit: "L" });
+    draw();
+  };
+
+  $("btnAdminSave").onclick = () => {
+    const newName = $("adminName").value.trim();
+    if (!newName) { msg.textContent = "Poné un nombre."; msg.className="msg bad"; return; }
+
+    recipe.name = newName;
+    recipe.ingredients = recipe.ingredients
+      .map(x => ({ name: String(x.name||"").trim(), qty: Number(x.qty), unit: String(x.unit||"").trim() }))
+      .filter(x => x.name && isFinite(x.qty) && x.qty >= 0 && x.unit);
+
+    const all = loadRecipes();
+    const idx = all.findIndex(r => r.id === recipe.id);
+    if (idx !== -1) {
+      all[idx] = recipe;
+      saveRecipes(all);
+    }
+    msg.textContent = "Cambios guardados.";
+    msg.className = "msg ok";
+    refreshUI();
+  };
+
+  $("btnAdminDelete").onclick = () => {
+    const all = loadRecipes();
+    const filtered = all.filter(r => r.id !== recipe.id);
+    saveRecipes(filtered);
+    msg.textContent = "Receta borrada.";
+    msg.className = "msg ok";
+    refreshUI();
+    // reselect
+    $("adminRecipeSelect").value = filtered[0]?.id || "";
+    handleAdminSelect();
+  };
+}
+
+function escapeHtml(s){
+  return String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+}
+
+/* =========================
+   UI Refresh
+========================= */
+function refreshUI() {
+  const recipes = loadRecipes();
+  renderRecipeSelects(recipes);
+  // keep selections stable if possible
+  if (recipes.length > 0) {
+    if (!$("useRecipeSelect").value) $("useRecipeSelect").value = recipes[0].id;
+    if (!$("adminRecipeSelect").value) $("adminRecipeSelect").value = recipes[0].id;
+  }
+}
+
+/* =========================
+   Events
+========================= */
+$("tabBtnUse").onclick = () => setActiveTab("use");
+$("tabBtnAdmin").onclick = () => {
+  setActiveTab("admin");
+  handleAdminSelect();
+};
+
+$("btnAddIngredient").onclick = () => {
+  const name = $("ingName").value.trim();
+  const qty = Number($("ingQty").value);
+  const unit = $("ingUnit").value;
+
+  if (!name) { $("saveMsg").textContent="Poné nombre del ingrediente."; $("saveMsg").className="msg bad"; return; }
+  if (!isFinite(qty) || qty <= 0) { $("saveMsg").textContent="La cantidad debe ser mayor a 0."; $("saveMsg").className="msg bad"; return; }
+
+  draftIngredients.push({ name, qty, unit });
+  $("ingName").value = "";
+  $("ingQty").value = "";
+  $("saveMsg").textContent = "";
+  renderDraftIngredients();
+};
+
+$("btnClearDraft").onclick = () => {
+  draftIngredients = [];
+  $("newRecipeName").value = "";
+  $("saveMsg").textContent = "";
+  renderDraftIngredients();
+};
+
+$("btnSaveRecipe").onclick = () => {
+  const name = $("newRecipeName").value.trim();
+  if (!name) { $("saveMsg").textContent="Poné un nombre de receta."; $("saveMsg").className="msg bad"; return; }
+  if (draftIngredients.length === 0) { $("saveMsg").textContent="Agregá al menos 1 ingrediente."; $("saveMsg").className="msg bad"; return; }
+
+  const recipes = loadRecipes();
+  const newR = {
+    id: uid(),
+    name,
+    ingredients: draftIngredients.map(x => ({ name: x.name, qty: Number(x.qty), unit: x.unit }))
+  };
+  recipes.push(newR);
+  saveRecipes(recipes);
+
+  $("saveMsg").textContent = "Receta guardada.";
+  $("saveMsg").className = "msg ok";
+  draftIngredients = [];
+  renderDraftIngredients();
+  $("newRecipeName").value = "";
+
+  refreshUI();
+};
+
+$("btnCalculate").onclick = () => {
+  const recipes = loadRecipes();
+  const rid = $("useRecipeSelect").value;
+  const recipe = recipes.find(r => r.id === rid);
+  const ha = Number($("useHectares").value);
+
+  $("calcMsg").textContent = "";
+  $("calcOutput").style.display = "none";
+  $("calcOutput").innerHTML = "";
+
+  if (!recipe) { $("calcMsg").textContent="No hay receta seleccionada."; return; }
+  if (!isFinite(ha) || ha <= 0) { $("calcMsg").textContent="Ingresá hectáreas válidas (>0)."; return; }
+
+  const lines = calculateForHectares(recipe, ha);
+  renderCalcOutput(lines);
+};
+
+$("btnExportCSV").onclick = () => {
+  const recipes = loadRecipes();
+  if (recipes.length === 0) {
+    $("csvMsg").textContent = "No hay recetas para exportar.";
+    return;
+  }
+  const csv = recipesToCSV(recipes);
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "recetas_fumigacion.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+
+  $("csvMsg").textContent = "CSV exportado.";
+};
+
+$("importCSVFile").addEventListener("change", async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const imported = parseCSV(text);
+
+    if (!Array.isArray(imported) || imported.length === 0) {
+      $("csvMsg").textContent = "CSV vacío o inválido.";
+      return;
+    }
+
+    // Merge by recipe id; if collision, keep imported name/ings
+    const current = loadRecipes();
+    const map = new Map(current.map(r => [r.id, r]));
+    imported.forEach(r => map.set(r.id, r));
+    const merged = Array.from(map.values());
+
+    saveRecipes(merged);
+    refreshUI();
+
+    $("csvMsg").textContent = "CSV importado correctamente.";
+  } catch (err) {
+    $("csvMsg").textContent = "Error importando CSV: " + (err?.message || String(err));
+  } finally {
+    e.target.value = "";
+  }
+});
+
+function handleAdminSelect() {
+  const recipes = loadRecipes();
+  const rid = $("adminRecipeSelect").value;
+  const r = recipes.find(x => x.id === rid);
+  if (!r) { renderAdminEditor(null); return; }
+
+  // Make a deep copy for editing
+  const copy = {
+    id: r.id,
+    name: r.name,
+    ingredients: (r.ingredients || []).map(i => ({ name: i.name, qty: i.qty, unit: i.unit }))
+  };
+  renderAdminEditor(copy);
+}
+
+/* =========================
+   Init UI
+========================= */
+renderDraftIngredients();
+refreshUI();
+
+/* =========================
+   LICENSE WALL (robusto)
+========================= */
 const DEVICE_KEY="fumig_device_id_v1";
 const LICENSE_KEY="fumig_license_v1";
 
 function getDeviceId(){
   let id=localStorage.getItem(DEVICE_KEY);
   if(!id){
-    id=crypto.randomUUID();
+    id = (crypto.randomUUID ? crypto.randomUUID() : ("dev-" + Math.random().toString(16).slice(2)));
     localStorage.setItem(DEVICE_KEY,id);
   }
   return id;
 }
 
 function showWall(show){
-  licenseWall.style.display=show?"block":"none";
-  appRoot.style.display=show?"none":"block";
+  const wall = $("licenseWall");
+  const app = $("appRoot");
+  if (!wall || !app) return;
+  wall.style.display = show ? "block" : "none";
+  app.style.display = show ? "none" : "block";
+}
+
+function getLicenseState(){
+  try { return JSON.parse(localStorage.getItem(LICENSE_KEY) || "null"); }
+  catch { return null; }
+}
+
+function setLicenseMsg(text, ok=false){
+  const el = $("licenseMsg");
+  el.textContent = text || "";
+  el.className = "msg " + (ok ? "ok" : "bad");
 }
 
 async function activate(code){
@@ -625,44 +921,66 @@ async function activate(code){
   });
 
   const text = await res.text();
-
-  // Intentamos parsear JSON; si no se puede, devolvemos el texto crudo
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { ok: false, reason: `Respuesta no-JSON (${res.status}): ${text.slice(0, 200)}` };
-  }
+  try { return JSON.parse(text); }
+  catch { return { ok:false, reason:`Respuesta no-JSON (${res.status}): ${text.slice(0,200)}` }; }
 }
 
-window.onload=async()=>{
-  const lic=JSON.parse(localStorage.getItem(LICENSE_KEY)||"null");
-  if(lic?.activated && lic.deviceId===getDeviceId()){
-    showWall(false); return;
+document.addEventListener("DOMContentLoaded", () => {
+  // Sanity: IDs
+  const required = ["licenseWall","appRoot","licenseCodeInput","licenseActivateBtn","licenseMsg"];
+  for (const id of required){
+    if (!$(id)) {
+      console.error("Falta elemento:", id);
+      // Si falta, mostramos app para no dejar al usuario en blanco
+      $("appRoot").style.display = "block";
+      return;
+    }
   }
-  showWall(true);
-  licenseActivateBtn.onclick = async () => {
-  licenseMsg.textContent = "";
-  const code = licenseCodeInput.value.trim();
 
-  if (!code) { licenseMsg.textContent = "Ingresá un código."; return; }
+  const deviceId = getDeviceId();
+  const lic = getLicenseState();
 
-  try {
-    const r = await activate(code);
-    if (!r.ok) { licenseMsg.textContent = r.reason || "Activación fallida."; return; }
-
-    localStorage.setItem(LICENSE_KEY, JSON.stringify({ activated:true, deviceId:getDeviceId() }));
+  if (lic?.activated && lic.deviceId === deviceId) {
     showWall(false);
-  } catch (e) {
-    licenseMsg.textContent = "Error de conexión o servidor. Abrí la consola para ver detalles.";
-    console.error(e);
+    return;
   }
-};
 
-};
+  showWall(true);
+  setLicenseMsg("");
+
+  $("licenseActivateBtn").addEventListener("click", async () => {
+    setLicenseMsg("");
+    const code = $("licenseCodeInput").value.trim();
+    if (!code) { setLicenseMsg("Ingresá un código."); return; }
+
+    $("licenseActivateBtn").disabled = true;
+    $("licenseActivateBtn").textContent = "Activando...";
+
+    try{
+      const r = await activate(code);
+      if (!r.ok) {
+        setLicenseMsg(r.reason || "Activación fallida.");
+        $("licenseActivateBtn").disabled = false;
+        $("licenseActivateBtn").textContent = "Activar";
+        return;
+      }
+
+      localStorage.setItem(LICENSE_KEY, JSON.stringify({
+        activated:true,
+        deviceId,
+        activatedAt: new Date().toISOString()
+      }));
+
+      showWall(false);
+    } catch (e) {
+      console.error(e);
+      setLicenseMsg("Error de conexión o servidor.");
+      $("licenseActivateBtn").disabled = false;
+      $("licenseActivateBtn").textContent = "Activar";
+    }
+  });
+});
 </script>
 
 </body>
-
-
-
 </html>
