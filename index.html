@@ -618,12 +618,20 @@ function showWall(show){
 }
 
 async function activate(code){
-  const res=await fetch("/.netlify/functions/activate",{
+  const res = await fetch("/.netlify/functions/activate",{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body:JSON.stringify({ code, deviceId:getDeviceId() })
   });
-  return res.json();
+
+  const text = await res.text();
+
+  // Intentamos parsear JSON; si no se puede, devolvemos el texto crudo
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { ok: false, reason: `Respuesta no-JSON (${res.status}): ${text.slice(0, 200)}` };
+  }
 }
 
 window.onload=async()=>{
@@ -632,13 +640,24 @@ window.onload=async()=>{
     showWall(false); return;
   }
   showWall(true);
-  licenseActivateBtn.onclick=async()=>{
-    const code=licenseCodeInput.value.trim();
-    const r=await activate(code);
-    if(!r.ok){ licenseMsg.textContent=r.reason; return; }
-    localStorage.setItem(LICENSE_KEY,JSON.stringify({activated:true,deviceId:getDeviceId()}));
+  licenseActivateBtn.onclick = async () => {
+  licenseMsg.textContent = "";
+  const code = licenseCodeInput.value.trim();
+
+  if (!code) { licenseMsg.textContent = "Ingresá un código."; return; }
+
+  try {
+    const r = await activate(code);
+    if (!r.ok) { licenseMsg.textContent = r.reason || "Activación fallida."; return; }
+
+    localStorage.setItem(LICENSE_KEY, JSON.stringify({ activated:true, deviceId:getDeviceId() }));
     showWall(false);
-  };
+  } catch (e) {
+    licenseMsg.textContent = "Error de conexión o servidor. Abrí la consola para ver detalles.";
+    console.error(e);
+  }
+};
+
 };
 </script>
 
