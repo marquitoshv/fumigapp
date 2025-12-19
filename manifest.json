@@ -1,0 +1,9 @@
+{
+  "name": "Recetas de Fumigación",
+  "short_name": "Fumigación",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#111111"
+}
