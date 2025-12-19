@@ -1,26 +1,55 @@
 const fs = require("fs");
 const path = require("path");
 
+// --- Helpers Upstash (robusto) ---
 async function redisGet(baseUrl, token, key) {
-  const res = await fetch(`${baseUrl}/get/${encodeURIComponent(key)}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const data = await res.json();
+  const url = `${baseUrl}/get/${encodeURIComponent(key)}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  const text = await res.text();
+
+  if (!res.ok) {
+    throw new Error(`Upstash GET failed (${res.status}): ${text.slice(0, 200)}`);
+  }
+
+  let data;
+  try { data = JSON.parse(text); }
+  catch { throw new Error(`Upstash GET non-JSON: ${text.slice(0, 200)}`); }
+
   return data.result ?? null;
 }
 
 async function redisSet(baseUrl, token, key, value) {
-  await fetch(`${baseUrl}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const url = `${baseUrl}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  const text = await res.text();
+
+  if (!res.ok) {
+    throw new Error(`Upstash SET failed (${res.status}): ${text.slice(0, 200)}`);
+  }
+
+  // Upstash responde JSON; pero no lo necesitamos para seguir
+  return true;
 }
 
+// --- Load codes (robusto) ---
 function loadCodes() {
-  // robust path to project root
+  // raíz del repo: ../../codes.json
   const p = path.join(__dirname, "..", "..", "codes.json");
+
+  if (!fs.existsSync(p)) {
+    throw new Error(`No encuentro codes.json en: ${p}`);
+  }
+
   const raw = fs.readFileSync(p, "utf8");
-  const parsed = JSON.parse(raw);
-  return Array.isArray(parsed.codes) ? parsed.codes : [];
+  let parsed;
+  try { parsed = JSON.parse(raw); }
+  catch { throw new Error("codes.json no es JSON válido"); }
+
+  if (!Array.isArray(parsed.codes)) {
+    throw new Error("codes.json debe tener { \"codes\": [ ... ] }");
+  }
+
+  return parsed.codes;
 }
 
 exports.handler = async function handler(event) {
@@ -29,7 +58,9 @@ exports.handler = async function handler(event) {
   }
 
   try {
-    const { code, deviceId } = JSON.parse(event.body || "{}");
+    const body = JSON.parse(event.body || "{}");
+    const code = (body.code || "").trim();
+    const deviceId = (body.deviceId || "").trim();
 
     if (!code || !deviceId) {
       return { statusCode: 200, body: JSON.stringify({ ok: false, reason: "Datos incompletos" }) };
@@ -53,7 +84,7 @@ exports.handler = async function handler(event) {
       return { statusCode: 200, body: JSON.stringify({ ok: false, reason: "Código ya usado" }) };
     }
 
-    // prevent multiple codes per device
+    // 1 device -> 1 code
     const already = await redisGet(baseUrl, token, `device:${deviceId}`);
     if (already && already !== code) {
       return { statusCode: 200, body: JSON.stringify({ ok: false, reason: "Dispositivo ya activado" }) };
@@ -64,6 +95,13 @@ exports.handler = async function handler(event) {
 
     return { statusCode: 200, body: JSON.stringify({ ok: true }) };
   } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ ok: false, reason: "Error interno" }) };
+    // 👇 DEBUG: devolvemos el error real para que lo puedas ver en consola
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        ok: false,
+        reason: `DEBUG: ${err?.message || String(err)}`
+      })
+    };
   }
 };
